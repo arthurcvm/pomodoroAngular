@@ -1,0 +1,146 @@
+ 
+<html ng-App="myApp"  ng-controller="myAppCtrl">
+  <head>
+    <title>{{titulo}}Pomodoro Plus</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
+    <script src="ng-timer.min.js"></script>
+    <script src="bower_components/moment/min/moment.min.js"></script>
+    <script src="bower_components/moment/min/locales.min.js"></script>
+    <script src="bower_components/humanize-duration/humanize-duration.js"></script>
+    <script src="http://i.cloudup.com/KRNLFuBG4v.js"></script>
+    <style type="text/css">
+      .concluida{
+        text-decoration: line-through;
+        color: #ccc;
+      }
+
+      .ciclo{
+        color: red;
+      }
+
+      .intervalo{
+        color: green;
+      }
+  
+    </style>
+    <script type="text/javascript">
+      angular.module('myApp', ['timer']);
+      angular.module('myApp').controller('myAppCtrl', function($scope) {
+        $scope.ciclo = 1500; //25min
+        $scope.interCurto = 300; //5min
+        $scope.interLongo = 900; //15min
+        $scope.titulo = "";
+  
+        $scope.atividades = [
+        ];
+
+        $scope.cronometro = {'classe':'ciclo', 'texto':'Iniciar ciclo', 'qtdCiclo': 0};
+
+        $scope.timerButton = function () {
+          if ($scope.cronometro.texto == "Iniciar ciclo") {
+            if($scope.cronometro.qtdCiclo > 0){
+              $scope.$broadcast('timer-add-cd-seconds', $scope.ciclo);
+            }
+              $scope.$broadcast('timer-start');
+              $scope.cronometro.texto = "Parar ciclo";
+          }
+          else if($scope.cronometro.texto == "Iniciar intervalo curto"){
+            $scope.$broadcast('timer-add-cd-seconds', $scope.interCurto);
+            $scope.$broadcast('timer-start');
+            $scope.cronometro.texto = "Parar intervalo";
+          }
+          else if($scope.cronometro.texto == "Iniciar intervalo longo"){
+            $scope.$broadcast('timer-add-cd-seconds', $scope.interLongo);
+            $scope.$broadcast('timer-start');
+            $scope.cronometro.texto = "Parar intervalo";
+          }
+          else if($scope.cronometro.texto == "Parar ciclo"){
+            $scope.$broadcast('timer-stop');
+            $scope.$broadcast('timer-reset');
+            $scope.cronometro.texto = "Iniciar ciclo";
+          }
+          else if($scope.cronometro.texto == "Parar intervalo"){
+            $scope.$broadcast('timer-stop');
+            $scope.$broadcast('timer-reset');
+            $scope.cronometro.classe = "ciclo";
+            $scope.cronometro.texto = "Iniciar ciclo";
+          }
+        }
+
+        $scope.concluido = function () {
+          if($scope.cronometro.texto == "Parar ciclo"){
+            playAlert('purr');
+            alert("Ciclo encerrado");
+            $scope.cronometro.qtdCiclo += 1;
+
+            $scope.atividades.forEach(atividade => {
+              if (!atividade.concluida) {
+                atividade.ciclos += 1;
+              }
+            });
+
+            if($scope.cronometro.qtdCiclo == 4){
+              $scope.cronometro.qtdCiclo = 0;
+              $scope.cronometro.classe = "intervalo";
+              $scope.cronometro.texto = "Iniciar intervalo longo";
+            }
+            else{
+              $scope.cronometro.classe = "intervalo";
+              $scope.cronometro.texto = "Iniciar intervalo curto";
+            }
+          }
+          else{
+            playAlert('purr');
+            alert("Intervalo encerrado");
+            $scope.cronometro.classe = "ciclo";
+            $scope.cronometro.texto = "Iniciar ciclo";
+          }
+        }
+
+        $scope.adicionarAtividade = function() {
+          $scope.atividades.push(
+          {
+            'titulo':$scope.novaAtividade, 'concluida':false, 'ciclos': 0
+          })
+          $scope.novaAtividade = '';
+        }
+
+        $scope.$on('timer-tick', function (event, data) {
+                        $scope.titulo = '('+data.minutes+':'+data.seconds+') - ';
+        });
+  
+      });
+    </script>
+  </head>
+  <body>
+    <div>
+      <form name="frm" ng-submit="adicionarAtividade()">
+        <input type="text" ng-model="novaAtividade" required/>
+        <button ng-disabled="frm.$invalid">Adicionar</button>
+      </form>
+      <timer ng-class="cronometro.classe" autostart="false" finish-callback="concluido()" countdown="ciclo" interval="1000">{{minutes}}:{{seconds}}</timer>
+      
+      <button ng-click="timerButton()">{{cronometro.texto}}</button>
+
+      <ul>
+        <h3>Por fazer</h3>
+        <li ng-repeat="atividade in atividades" ng-if="!atividade.concluida">
+          <input type="checkbox" ng-model="atividade.concluida">
+          <span ng-class="{'concluida':atividade.concluida}">{{atividade.titulo}}</span>
+          <span ng-class="{'concluida':atividade.concluida}"> => {{atividade.ciclos}}</span>
+        </li>
+      </ul>
+      <ul>
+        <h3>Feitas</h3>
+        <li ng-repeat="atividade in atividades" ng-if="atividade.concluida">
+          <input type="checkbox" ng-model="atividade.concluida">
+          <span ng-class="{'concluida':atividade.concluida}">{{atividade.titulo}}</span>
+          <span ng-class="{'concluida':atividade.concluida}"> = {{atividade.ciclos}}</span>
+        </li>
+      </ul>
+
+      
+    </div>
+  </body>
+  </html>
+  
