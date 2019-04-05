@@ -1,6 +1,7 @@
  
 <html ng-App="myApp"  ng-controller="myAppCtrl">
   <head>
+    <meta charset="UTF-8"> 
     <title>{{titulo}}Pomodoro Plus</title>
     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
     <script src="ng-timer.min.js"></script>
@@ -8,12 +9,14 @@
     <script src="bower_components/moment/min/locales.min.js"></script>
     <script src="bower_components/humanize-duration/humanize-duration.js"></script>
     <script src="http://i.cloudup.com/KRNLFuBG4v.js"></script>
-    <style type="text/css">
-      .concluida{
-        text-decoration: line-through;
-        color: #ccc;
-      }
 
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        
+    <style type="text/css">
       .ciclo{
         color: red;
       }
@@ -34,7 +37,7 @@
         $scope.atividades = [
         ];
 
-        $scope.cronometro = {'classe':'ciclo', 'texto':'Iniciar ciclo', 'qtdCiclo': 0};
+        $scope.cronometro = {'classe':'text-danger', 'texto':'Iniciar ciclo', 'qtdCiclo': 0};
 
         $scope.timerButton = function () {
           if ($scope.cronometro.texto == "Iniciar ciclo") {
@@ -62,7 +65,7 @@
           else if($scope.cronometro.texto == "Parar intervalo"){
             $scope.$broadcast('timer-stop');
             $scope.$broadcast('timer-reset');
-            $scope.cronometro.classe = "ciclo";
+            $scope.cronometro.classe = "text-danger";
             $scope.cronometro.texto = "Iniciar ciclo";
           }
         }
@@ -81,18 +84,18 @@
 
             if($scope.cronometro.qtdCiclo == 4){
               $scope.cronometro.qtdCiclo = 0;
-              $scope.cronometro.classe = "intervalo";
+              $scope.cronometro.classe = "text-success";
               $scope.cronometro.texto = "Iniciar intervalo longo";
             }
             else{
-              $scope.cronometro.classe = "intervalo";
+              $scope.cronometro.classe = "text-success";
               $scope.cronometro.texto = "Iniciar intervalo curto";
             }
           }
           else{
             playAlert('purr');
             alert("Intervalo encerrado");
-            $scope.cronometro.classe = "ciclo";
+            $scope.cronometro.classe = "text-danger";
             $scope.cronometro.texto = "Iniciar ciclo";
           }
         }
@@ -113,31 +116,70 @@
     </script>
   </head>
   <body>
-    <div>
-      <form name="frm" ng-submit="adicionarAtividade()">
+    <div class="container-fluid">
+      <h2>Pomodoro Plus</h2>
+      <form name="frm" class="text-center" ng-submit="adicionarAtividade()">
         <input type="text" ng-model="novaAtividade" required/>
-        <button ng-disabled="frm.$invalid">Adicionar</button>
+        <button class="btn btn-primary" ng-disabled="frm.$invalid">Adicionar</button>
       </form>
-      <timer ng-class="cronometro.classe" autostart="false" finish-callback="concluido()" countdown="ciclo" interval="1000">{{minutes}}:{{seconds}}</timer>
-      
-      <button ng-click="timerButton()">{{cronometro.texto}}</button>
+      <div class="col-12 text-center mt-1">
+        <h3><b><timer ng-class="cronometro.classe" autostart="false" finish-callback="concluido()" countdown="ciclo" interval="1000">{{minutes}}:{{seconds}}</timer></b></h3>
 
-      <ul>
-        <h3>Por fazer</h3>
-        <li ng-repeat="atividade in atividades" ng-if="!atividade.concluida">
-          <input type="checkbox" ng-model="atividade.concluida">
-          <span ng-class="{'concluida':atividade.concluida}">{{atividade.titulo}}</span>
-          <span ng-class="{'concluida':atividade.concluida}"> => {{atividade.ciclos}}</span>
-        </li>
-      </ul>
-      <ul>
-        <h3>Feitas</h3>
-        <li ng-repeat="atividade in atividades" ng-if="atividade.concluida">
-          <input type="checkbox" ng-model="atividade.concluida">
-          <span ng-class="{'concluida':atividade.concluida}">{{atividade.titulo}}</span>
-          <span ng-class="{'concluida':atividade.concluida}"> = {{atividade.ciclos}}</span>
-        </li>
-      </ul>
+        <button type="button" class="btn btn-success" ng-click="timerButton()">{{cronometro.texto}}</button>
+      </div>
+
+
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-12 text-center mt-1">
+                <h3>Por fazer</h3>
+              <div class="card-deck mt-5 mt-lg-3 pt-lg-0 pt-3 mb-5 mb-lg-3 pb-lg-0 pb-3">
+                  <div class="col-sm-6 col-md-4 col-lg-3"  ng-repeat="atividade in atividades" ng-if="!atividade.concluida">
+                    <div class="card bg-primary text-white mb-3">
+                        <div class="card-block">
+                            <div class="card-body">
+                              <p ng-class="{'concluida':atividade.concluida}">{{atividade.titulo}}</p>
+                              <input type="checkbox" ng-model="atividade.concluida">
+                              <span>Concluída</span>
+                            </div>
+                            <div class="card-footer">
+                              <p ng-class="{'concluida':atividade.concluida}"> Quantidade de ciclos: {{atividade.ciclos}}</p>
+                                </a>
+                            </div>
+                        </div>
+                      </div>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="container-fluid">
+            <div class="row">
+              <div class="col-12 text-center mt-1">
+                  <h3>Feitas</h3>
+                <div class="card-deck mt-5 mt-lg-3 pt-lg-0 pt-3 mb-5 mb-lg-3 pb-lg-0 pb-3">
+                    <div class="col-sm-6 col-md-4 col-lg-3"  ng-repeat="atividade in atividades" ng-if="atividade.concluida">
+                      <div class="card bg-success text-white mb-3">
+                          <div class="card-block">
+                              <div class="card-body">
+                                <p ng-class="{'concluida':atividade.concluida}">{{atividade.titulo}}</p>
+                                <input type="checkbox" ng-model="atividade.concluida">
+                                <span>Concluída</span>
+                              </div>
+                              <div class="card-footer">
+                                <p ng-class="{'concluida':atividade.concluida}"> Quantidade de ciclos: {{atividade.ciclos}}</p>
+                                  </a>
+                              </div>
+                          </div>
+                        </div>
+                    
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
       
     </div>
